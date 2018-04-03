@@ -270,6 +270,16 @@ module Yodleeicious
       cobranded_session_execute_api '/jsonsdk/RoutingNumberService/getContentServiceInfoByRoutingNumber', params
     end
 
+    def get_authenticator_token
+      resp = cobranded_session_execute_api("authenticator/token", {
+                                                 finAppId: fin_app_id,
+                                                 rsession: rsession
+                                           })
+      json = resp.body
+      json.fetch("finappAuthenticationInfos", [{}])[0]["token"] or
+        raise(UnexpectedResponseError, "No token found in response body")
+    end
+
     def get_item_summaries
       user_session_execute_api '/jsonsdk/DataService/getItemSummaries', { 'bridgetAppId' => '10003200' }
     end
