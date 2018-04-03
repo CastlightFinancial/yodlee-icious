@@ -1,6 +1,3 @@
-require 'json'
-
-
 module Yodleeicious
   class YodleeApi
     attr_reader :base_url, :cobranded_username, :cobranded_password, :proxy_url, :logger

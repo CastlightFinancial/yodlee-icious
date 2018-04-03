@@ -1,14 +1,20 @@
 require 'rubygems'
+require "json"
 require 'logger'
 require 'faraday'
 require 'socksify'
+require "byebug"
 require 'socksify/http'
+require "active_support/core_ext/string"
+require "active_support/core_ext/hash"
 
-require File.dirname(__FILE__) + "/yodleeicious/version"
-require File.dirname(__FILE__) + "/yodleeicious/config"
-require File.dirname(__FILE__) + "/yodleeicious/parameter_translator"
-require File.dirname(__FILE__) + "/yodleeicious/response"
-require File.dirname(__FILE__) + "/yodleeicious/yodlee_api"
+
+require "yodleeicious/version"
+require "yodleeicious/unexpected_response_error"
+require "yodleeicious/config"
+require "yodleeicious/parameter_translator"
+require "yodleeicious/response"
+require "yodleeicious/yodlee_api"
 
 class Faraday::Adapter::NetHttp
   def net_http_connection(env)
