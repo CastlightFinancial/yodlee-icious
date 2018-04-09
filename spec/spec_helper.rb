@@ -7,7 +7,7 @@ unless defined?(SPEC_HELPER_LOADED)
   SPEC_HELPER_LOADED = true
 
   require "yodleeicious"
-  require 'dotenv'
+  require "dotenv"
   Dotenv.load
 
   RSpec.configure do |config|
