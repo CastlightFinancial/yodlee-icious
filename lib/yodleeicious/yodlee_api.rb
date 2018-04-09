@@ -1,9 +1,30 @@
-require 'json'
-
-
 module Yodleeicious
   class YodleeApi
-    attr_reader :base_url, :cobranded_username, :cobranded_password, :proxy_url, :logger
+
+    ##
+    #
+    attr_reader :base_url
+
+    ##
+    #
+    attr_reader :cobranded_app_name
+
+    ##
+    #
+    attr_reader :cobranded_username
+
+    ##
+    #
+    attr_reader :cobranded_password
+
+    ##
+    #
+    attr_reader :proxy_url
+
+    ##
+    #
+    attr_reader :logger
+
 
     def initialize config = {}
       configure config
@@ -11,11 +32,12 @@ module Yodleeicious
 
     def configure config = {}
       validate config
-      @base_url = config[:base_url] || Yodleeicious::Config.base_url
-      @cobranded_username = config[:cobranded_username] || Yodleeicious::Config.cobranded_username
-      @cobranded_password = config[:cobranded_password] || Yodleeicious::Config.cobranded_password
-      @proxy_url = config[:proxy_url] || Yodleeicious::Config.proxy_url
-      @logger = config[:logger] || Yodleeicious::Config.logger
+      @base_url           = extract_configuration(:base_url, config)
+      @cobranded_app_name = extract_configuration(:cobranded_app_name, config)
+      @cobranded_username = extract_configuration(:cobranded_username, config)
+      @cobranded_password = extract_configuration(:cobranded_password, config)
+      @proxy_url          = extract_configuration(:proxy_url, config)
+      @logger             = extract_configuration(:logger, config)
 
       info_log "YodleeApi configured with base_url=#{base_url} cobranded_username=#{cobranded_username} proxy_url=#{proxy_url} logger=#{logger}"
     end
@@ -83,10 +105,10 @@ module Yodleeicious
 
     def register_user username, password, emailAddress, options = {}
       params = {
-        'userCredentials.loginName' => username,
-        'userCredentials.password' => password,
+        'userCredentials.loginName'          => username,
+        'userCredentials.password'           => password,
         'userCredentials.objectInstanceType' => 'com.yodlee.ext.login.PasswordCredentials',
-        'userProfile.emailAddress' => emailAddress
+        'userProfile.emailAddress'           => emailAddress
         #todo add in user preferences
       }.merge(options)
 
@@ -248,6 +270,16 @@ module Yodleeicious
       cobranded_session_execute_api '/jsonsdk/RoutingNumberService/getContentServiceInfoByRoutingNumber', params
     end
 
+    def get_authenticator_token
+      resp = cobranded_session_execute_api("authenticator/token", {
+                                                 finAppId: fin_app_id,
+                                                 rsession: rsession
+                                           })
+      json = resp.body
+      json.fetch("finappAuthenticationInfos", [{}])[0]["token"] or
+        raise(UnexpectedResponseError, "No token found in response body")
+    end
+
     def get_item_summaries
       user_session_execute_api '/jsonsdk/DataService/getItemSummaries', { 'bridgetAppId' => '10003200' }
     end
@@ -307,12 +339,9 @@ module Yodleeicious
       user_session_execute_api '/jsonsdk/TransactionSearchService/getUserTransactions', params
     end
 
-    def cobranded_session_execute_api uri, params = {}
-      params = {
-        cobSessionToken: cobranded_session_token,
-      }.merge(params)
-
-      execute_api uri, params
+    def cobranded_session_execute_api(uri, params = {})
+      request_params = { cobSessionToken: cobranded_session_token }.merge(params)
+      execute_api(uri, request_params)
     end
 
     def user_session_execute_api uri, params = {}
@@ -324,7 +353,7 @@ module Yodleeicious
     end
 
     def execute_api uri, params = {}
-      debug_log "calling #{uri} with #{params}"
+      debug_log "calling #{base_url}/#{uri} with #{params}"
       ssl_opts = { verify: false }
       connection = Faraday.new(url: base_url, ssl: ssl_opts, request: { proxy: proxy_opts })
 
@@ -335,6 +364,7 @@ module Yodleeicious
       when 200
         Response.new(response, params)
       else
+        raise ErrorResponse, response.body
       end
     end
 
@@ -352,12 +382,21 @@ module Yodleeicious
 
     def cobranded_session_token
       return nil if cobranded_auth.nil?
-      cobranded_auth.fetch('cobrandConversationCredentials',{}).fetch('sessionToken','dude')
+      cobranded_auth.fetch('cobrandConversationCredentials',{})
+                    .fetch('sessionToken','dude')
     end
 
     def user_session_token
       return nil if user_auth.nil?
-      user_auth.fetch('userContext',{}).fetch('conversationCredentials',{}).fetch('sessionToken',nil)
+      user_auth.fetch('userContext', {})
+               .fetch('conversationCredentials', {})
+               .fetch('sessionToken', nil)
+    end
+
+    alias rsession user_session_token
+
+    def fin_app_id
+      ENV["YODLEE_FIN_APP_ID"].to_i
     end
 
     def debug_log msg
@@ -366,6 +405,10 @@ module Yodleeicious
 
     def info_log msg
       logger.info msg
+    end
+
+    def extract_configuration(config_name, configs_hash)
+      configs_hash[config_name.to_sym] || Yodleeicious::Config.public_send(config_name)
     end
 
   end

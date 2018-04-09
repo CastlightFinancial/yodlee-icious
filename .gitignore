@@ -15,3 +15,5 @@ mkmf.log
 .env
 yodlee-icious.sublime-project
 yodlee-icious.sublime-workspace
+.byebug_history
+log

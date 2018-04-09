@@ -1,12 +1,12 @@
-require "yodleeicious"
+require "spec_helper"
 
 describe 'the yodlee api client integration tests', integration: true do
   let(:config) {
     {
-      base_url: ENV['YODLEE_BASE_URL'],
-      cobranded_username: ENV['YODLEE_COBRANDED_USERNAME'],
-      cobranded_password: ENV['YODLEE_COBRANDED_PASSWORD'],
-      proxy_url: ENV['YODLEEICIOUS_PROXY_URL']
+      base_url: ENV['TEST_YODLEE_URL'],
+      cobranded_username: ENV['TEST_YODLEE_COBRANDED_USERNAME'],
+      cobranded_password: ENV['TEST_YODLEE_COBRANDED_PASSWORD'],
+      proxy_url: ENV['TEST_YODLEEICIOUS_PROXY_URL']
     }
   }
 
