@@ -359,7 +359,7 @@ module Yodleeicious
 
     def execute_api(path, params = {})
       base = base_url.gsub(/[^\/]\Z/, "")
-      path = path.sub!(/\A\//, '')
+      path = path.sub(/\A\//, '')
       uri  = URI.join(base, path)
       debug_log "calling #{uri} with #{params}"
 
