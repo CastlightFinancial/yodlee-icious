@@ -3,6 +3,7 @@ module Yodleeicious
 
     class << self
       attr_accessor :base_url
+      attr_accessor :fin_app_id
       attr_accessor :cobranded_app_name
       attr_accessor :cobranded_username
       attr_accessor :cobranded_password

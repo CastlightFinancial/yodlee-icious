@@ -19,6 +19,10 @@ module Yodleeicious
 
     ##
     #
+    attr_accessor :fin_app_id
+
+    ##
+    #
     attr_reader :proxy_url
 
     ##
@@ -33,6 +37,7 @@ module Yodleeicious
     def configure config = {}
       validate config
       @base_url           = extract_configuration(:base_url, config)
+      @fin_app_id         = extract_configuration(:fin_app_id, config)
       @cobranded_app_name = extract_configuration(:cobranded_app_name, config)
       @cobranded_username = extract_configuration(:cobranded_username, config)
       @cobranded_password = extract_configuration(:cobranded_password, config)
@@ -394,10 +399,6 @@ module Yodleeicious
     end
 
     alias rsession user_session_token
-
-    def fin_app_id
-      ENV["YODLEE_FIN_APP_ID"].to_i
-    end
 
     def debug_log msg
       logger.debug msg
