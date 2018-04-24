@@ -357,13 +357,18 @@ module Yodleeicious
       cobranded_session_execute_api uri, params
     end
 
-    def execute_api uri, params = {}
-      debug_log "calling #{base_url}/#{uri} with #{params}"
-      ssl_opts = { verify: false }
-      connection = Faraday.new(url: base_url, ssl: ssl_opts, request: { proxy: proxy_opts })
+    def execute_api(path, params = {})
+      uri      = URI(base_url)
+      uri.path = path.gsub(/^/, '/').gsub(/\/{1..3}/, '/')
+      debug_log "calling #{uri} with #{params}"
+      connection = Faraday.new(url: uri,
+                               ssl: { verify: false },
+                               request: { proxy: proxy_opts })
 
-      response = connection.post("#{base_url}#{uri}", params)
-      debug_log "response=#{response.status} success?=#{response.success?} body=#{response.body} "
+      response = connection.post(uri, params)
+      debug_log "response=#{response.status}"\
+                  " success?=#{response.success?}"\
+                  " body=#{response.body}"
 
       case response.status
       when 200
