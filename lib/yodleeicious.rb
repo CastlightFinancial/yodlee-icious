@@ -1,15 +1,16 @@
-require 'rubygems'
+require "rubygems"
 require "json"
-require 'logger'
-require 'faraday'
-require 'socksify'
+require "logger"
+require "faraday"
+require "socksify"
 require "byebug"
-require 'socksify/http'
+require "socksify/http"
 require "active_support/core_ext/string"
 require "active_support/core_ext/hash"
 
 
 require "yodleeicious/version"
+require "yodleeicious/error_response"
 require "yodleeicious/unexpected_response_error"
 require "yodleeicious/config"
 require "yodleeicious/parameter_translator"

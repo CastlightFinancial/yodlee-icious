@@ -358,17 +358,19 @@ module Yodleeicious
     end
 
     def execute_api(path, params = {})
-      uri      = URI(base_url)
-      uri.path = path.gsub(/^/, '/').gsub(/\/{1..3}/, '/')
+      base = base_url.gsub(/[^\/]\Z/, "/")
+      path = path.sub!(/\A\//, '/')
+      uri  = URI.join(base, path)
       debug_log "calling #{uri} with #{params}"
-      connection = Faraday.new(url: uri,
+
+      connection = Faraday.new(url: base,
                                ssl: { verify: false },
                                request: { proxy: proxy_opts })
 
-      response = connection.post(uri, params)
-      debug_log "response=#{response.status}"\
-                  " success?=#{response.success?}"\
-                  " body=#{response.body}"
+      response = connection.post(path, params)
+      debug_log "response=#{response.status} \
+                  success?=#{response.success?} \
+                  body=#{response.body} "
 
       case response.status
       when 200
