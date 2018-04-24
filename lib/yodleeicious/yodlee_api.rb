@@ -363,11 +363,11 @@ module Yodleeicious
       uri  = URI.join(base, path)
       debug_log "calling #{uri} with #{params}"
 
-      connection = Faraday.new(url: base,
+      connection = Faraday.new(url: uri.scheme + "://" + uri.host,
                                ssl: { verify: false },
                                request: { proxy: proxy_opts })
 
-      response = connection.post(path, params)
+      response = connection.post(uri.path, params)
       debug_log "response=#{response.status} \
                   success?=#{response.success?} \
                   body=#{response.body} "
